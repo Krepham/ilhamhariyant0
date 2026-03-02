@@ -7,15 +7,13 @@
     <style>
         /* --- CSS VARIABLES (NEO-BRUTALISM PALETTE) --- */
         :root {
-            /* Warna Background Cream/Putih Tulang */
-            --bg-color: #Fdfbf7;
-            /* Warna Hitam Pekat untuk Garis */
+            /* Warna Background Cream/Putih Tulang (Sekarang Transparan untuk Video) */
+            --bg-color: #Fdfbf7; 
+            --bg-overlay: rgba(253, 251, 247, 0.733); /* Overlay agar teks terbaca di atas video */
+            
             --main-black: #10180b;
-            /* Aksen Hijau (Diambil inspirasi dari CV) */
             --accent-green: #9dc08b; 
-            /* Aksen Ungu Vivid (Khas Neo-Brutalism) */
             --accent-purple: #B996F7;
-            /* Aksen Kuning Mencolok */
             --accent-yellow: #FFD02F;
             
             --border-width: 3px;
@@ -27,11 +25,41 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: 'Courier New', Courier, monospace; /* Font teknis */
-            background-color: var(--bg-color);
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--main-black); /* Fallback color */
             color: var(--main-black);
             overflow-x: hidden;
             line-height: 1.6;
+            position: relative;
+        }
+
+        /* --- VIDEO BACKGROUND STYLES --- */
+        #bg-video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            overflow: hidden;
+        }
+
+        #bg-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Overlay transparan agar teks tetap kontras */
+        .page-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-overlay);
+            z-index: -1;
+            backdrop-filter: blur(2px); /* Efek blur sedikit pada video */
         }
 
         /* --- TYPOGRAPHY --- */
@@ -85,7 +113,7 @@
         header {
             border-bottom: var(--border-width) solid var(--main-black);
             padding: 24px 0;
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -107,7 +135,7 @@
         /* --- HERO SECTION --- */
         .hero {
             display: grid;
-            grid-template-columns: 1.5fr 1fr; /* Kiri lebih lebar */
+            grid-template-columns: 1.5fr 1fr;
             gap: 40px;
             padding: 80px 0;
             align-items: center;
@@ -124,7 +152,6 @@
             margin-bottom: 15px;
         }
 
-        /* Profile Image Styling (Estetik & Tidak Mengganggu) */
         .hero-img-container {
             position: relative;
             display: flex;
@@ -136,17 +163,13 @@
             width: 320px;
             height: 400px;
             object-fit: cover;
-            /* Border tebal */
             border: var(--border-width) solid var(--main-black);
-            /* Background kartu putih */
             background: white;
-            /* Shadow keras */
             box-shadow: 12px 12px 0px var(--main-black);
-            /* Sedikit miring agar artistik */
             transform: rotate(3deg);
             z-index: 2;
             transition: transform 0.3s;
-            padding: 10px; /* Efek Polaroid */
+            padding: 10px;
             padding-bottom: 40px; 
         }
 
@@ -154,7 +177,6 @@
             transform: rotate(0deg) scale(1.02);
         }
 
-        /* Elemen Dekorasi di belakang foto */
         .deco-box {
             position: absolute;
             width: 320px;
@@ -162,11 +184,11 @@
             background: var(--accent-green);
             border: var(--border-width) solid var(--main-black);
             top: 20px;
-            right: 20px; /* Offset dari center */
+            right: 20px;
             z-index: 1;
         }
 
-        /* --- MARQUEE (TEXT JALAN) --- */
+        /* --- MARQUEE --- */
         .marquee-wrapper {
             background: var(--main-black);
             color: #fff;
@@ -175,6 +197,8 @@
             border-bottom: var(--border-width) solid var(--main-black);
             overflow: hidden;
             white-space: nowrap;
+            position: relative;
+            z-index: 10;
         }
         .marquee-content {
             display: inline-block;
@@ -189,20 +213,21 @@
             100% { transform: translateX(-50%); }
         }
 
-        /* --- SCROLLABLE SECTION (Horizontal Swipe) --- */
+        /* --- SECTIONS --- */
         .section-wrapper {
             padding: 80px 0;
             border-bottom: var(--border-width) solid var(--main-black);
+            /* Membuat section semi-transparan agar video terlihat samar */
+            background: rgba(255, 255, 255, 0.7); 
         }
 
         .scroll-container {
             display: flex;
             gap: 24px;
             overflow-x: auto;
-            padding: 20px 4px; /* Space for shadow */
+            padding: 20px 4px;
             cursor: grab;
             scroll-behavior: smooth;
-            /* Hide scrollbar */
             scrollbar-width: none;
             -ms-overflow-style: none;
         }
@@ -243,15 +268,16 @@
             background: var(--main-black);
         }
 
-        /* --- WORK CARDS (LANDSCAPE) --- */
+        /* --- WORK CARDS (MODIFIED FOR POPUP) --- */
         .work-card {
-            min-width: 450px; /* Lebar Landscape */
+            min-width: 450px;
             height: 300px;
             border: var(--border-width) solid var(--main-black);
             box-shadow: 8px 8px 0px var(--main-black);
             position: relative;
             overflow: hidden;
             background: #000;
+            cursor: pointer; /* Indikasi bisa diklik */
         }
         .work-card img {
             width: 100%;
@@ -276,12 +302,68 @@
             z-index: 2;
         }
 
+        /* --- LIGHTBOX / POPUP STYLES --- */
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 9999;
+            display: none; /* Hidden by default */
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .lightbox.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .lightbox-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        .lightbox-img {
+            max-width: 100%;
+            max-height: 85vh;
+            border: 5px solid white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            display: block;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: -40px;
+            right: -10px;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            background: var(--main-black);
+            padding: 5px 15px;
+            border: 2px solid white;
+            font-family: Arial, sans-serif;
+        }
+
+        .lightbox-close:hover {
+            background: var(--accent-yellow);
+            color: var(--main-black);
+        }
+
         /* --- FOOTER --- */
         footer {
             background: var(--main-black);
             color: white;
             padding: 60px 0;
             text-align: center;
+            position: relative;
+            z-index: 10;
         }
         .footer-link {
             color: var(--accent-green);
@@ -298,28 +380,27 @@
                 gap: 60px;
                 padding-top: 40px;
             }
-            .hero-img-container {
-                order: -1; /* Gambar di atas teks di HP */
-            }
-            .img-frame, .deco-box {
-                width: 280px;
-                height: 350px;
-            }
-            .deco-box {
-                right: 50%; /* Center trick */
-                transform: translateX(50%);
-                top: 15px;
-            }
+            .hero-img-container { order: -1; }
+            .img-frame, .deco-box { width: 280px; height: 350px; }
+            .deco-box { right: 50%; transform: translateX(50%); top: 15px; }
             .btn { width: 100%; margin-right: 0; }
+            .work-card { min-width: 85vw; height: 250px; }
             
-            .work-card {
-                min-width: 85vw; /* Kartu hampir selebar layar HP */
-                height: 250px;
-            }
+            /* Pada mobile, lightbox image lebih kecil */
+            .lightbox-img { max-width: 95%; border: 3px solid white; }
+            .lightbox-close { top: -50px; right: 0; }
         }
     </style>
 </head>
 <body>
+
+    <div id="bg-video-container">
+        <video id="bg-video" autoplay muted loop playsinline>
+            <source src="anime.mp4" type="video/mp4">
+            </video>
+    </div>
+    
+    <div class="page-overlay"></div>
 
     <header>
         <div class="container nav-flex">
@@ -334,9 +415,9 @@
         <div class="hero-text">
             <div class="hero-tags">BASED IN CIAMIS, Indonesia</div>
             <h1>Ilham<br>Hariyanto</h1>
-            <h3 style="color: #666; margin-bottom: 20px;"> GRAPHIC DESIGNER</h3>
+            <h3 style="color: #444; margin-bottom: 20px; font-weight:800; background:rgba(255,255,255,0.5); display:inline-block;"> GRAPHIC DESIGNER</h3>
             
-            <p style="margin-bottom: 30px;">
+            <p style="margin-bottom: 30px; font-weight: 500;">
                 Intermediate Graphic Designer dengan ketertarikan kuat pada branding dan konten digital. 
                 Fokus pada estetika, kejelasan pesan, dan kebutuhan audiens.
             </p>
@@ -354,7 +435,7 @@
 
         <div class="hero-img-container">
             <div class="deco-box"></div>
-            <img src="wy waipu.png" alt="Ilham Hariyanto" class="img-frame">
+            <img src="krepham.jpeg" alt="Ilham Hariyanto" class="img-frame">
         </div>
     </section>
 
@@ -364,7 +445,7 @@
         </div>
     </div>
 
-    <section class="section-wrapper" style="background: white;">
+    <section class="section-wrapper">
         <div class="container">
             <h2>Skill Set ⚡</h2>
             <p style="margin-bottom: 30px;">Geser untuk melihat keahlian (Scroll/Drag) --></p>
@@ -418,10 +499,10 @@
         </div>
     </section>
 
-    <section class="section-wrapper" id="works" style="background: var(--bg-color);">
+    <section class="section-wrapper" id="works">
         <div class="container">
             <h2>Selected Works 📂</h2>
-            <p style="margin-bottom: 30px;">Hasil karya visual dan branding (Geser Kanan) --></p>
+            <p style="margin-bottom: 30px;">Klik gambar untuk memperbesar & Geser Kanan untuk melihat lainnya --></p>
 
             <div class="scroll-container drag-scroll">
                 <div class="work-card">
@@ -474,38 +555,86 @@
         </div>
     </footer>
 
+    <div class="lightbox" id="lightbox">
+        <div class="lightbox-content">
+            <span class="lightbox-close">&times; CLOSE</span>
+            <img src="" alt="Full Works" class="lightbox-img" id="lightbox-img">
+        </div>
+    </div>
+
     <script>
-        // Fitur Drag-to-Scroll (Agar user bisa geser skill/work pakai mouse layaknya layar sentuh)
+        // --- 1. SCRIPT DRAG TO SCROLL (Diperbarui agar tidak bentrok dengan klik) ---
         const sliders = document.querySelectorAll('.drag-scroll');
         let isDown = false;
         let startX;
         let scrollLeft;
+        let isDragging = false; // Flag untuk mendeteksi apakah sedang drag atau klik
 
         sliders.forEach(slider => {
             slider.addEventListener('mousedown', (e) => {
                 isDown = true;
+                isDragging = false; // Reset status dragging
                 slider.classList.add('active');
                 startX = e.pageX - slider.offsetLeft;
                 scrollLeft = slider.scrollLeft;
             });
+            
             slider.addEventListener('mouseleave', () => {
                 isDown = false;
                 slider.classList.remove('active');
             });
+            
             slider.addEventListener('mouseup', () => {
                 isDown = false;
                 slider.classList.remove('active');
+                // Timeout kecil untuk memastikan status dragging terbaca oleh event click
+                setTimeout(() => { isDragging = false; }, 50); 
             });
+            
             slider.addEventListener('mousemove', (e) => {
                 if (!isDown) return;
                 e.preventDefault();
                 const x = e.pageX - slider.offsetLeft;
-                const walk = (x - startX) * 2; // Kecepatan scroll
+                const walk = (x - startX) * 2; 
                 slider.scrollLeft = scrollLeft - walk;
+                
+                // Jika gerakan mouse lebih dari 5px, anggap sebagai dragging
+                if(Math.abs(walk) > 5) {
+                    isDragging = true;
+                }
             });
         });
 
-        // Animasi Hover Button Effect Tambahan
+        // --- 2. SCRIPT IMAGE POP-UP (LIGHTBOX) ---
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const lightboxClose = document.querySelector('.lightbox-close');
+        const workCards = document.querySelectorAll('.work-card img');
+
+        // Fungsi buka lightbox
+        workCards.forEach(img => {
+            img.addEventListener('click', (e) => {
+                // Hanya buka jika user TIDAK sedang melakukan drag
+                if(!isDragging) {
+                    lightbox.classList.add('active');
+                    lightboxImg.src = img.src; // Ambil src dari gambar yang diklik
+                }
+            });
+        });
+
+        // Fungsi tutup lightbox (Klik tombol close)
+        lightboxClose.addEventListener('click', () => {
+            lightbox.classList.remove('active');
+        });
+
+        // Fungsi tutup lightbox (Klik area gelap di luar gambar)
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) {
+                lightbox.classList.remove('active');
+            }
+        });
+
+        // --- 3. ANIMASI TOMBOL ---
         const buttons = document.querySelectorAll('.btn');
         buttons.forEach(btn => {
             btn.addEventListener('mouseenter', () => {
